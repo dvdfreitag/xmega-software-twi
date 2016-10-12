@@ -121,7 +121,7 @@ uint8_t STWI_WriteBytes(uint8_t *data, uint8_t length)
 	return count;
 }
 
-uint8_t STWI_Read(uint8_t nack)
+uint8_t STWI_ReadByte(uint8_t nack)
 {
 	uint8_t c = 0;
 	// Ensure SDA is "high" -> SDA is an input.
