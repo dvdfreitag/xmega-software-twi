@@ -149,18 +149,18 @@ uint8_t STWI_ReadByte(uint8_t nack)
 	return c;
 }
 
-int8_t STWI_ReadBytes(uint8_t *data, uint8_t length)
+uint8_t STWI_ReadBytes(uint8_t *data, uint8_t length)
 {	// If buffer is null don't do anything
-	if (!data) return -1;
+	if (!data) return 1;
 	// Offset length
 	length--;
-	// Write bytes
+	// Read bytes
 	for (uint8_t i = 0; i < length; i++)
 	{
-		data[i] = STWI_Read(STWI_ACK);
+		data[i] = STWI_ReadByte(STWI_ACK);
 	}
 	// Read last byte with NACK
-	data[length] = STWI_Read(STWI_NACK);
+	data[length] = STWI_ReadByte(STWI_NACK);
 	// Return success
 	return 0;
 }
