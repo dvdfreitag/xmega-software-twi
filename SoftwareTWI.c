@@ -10,6 +10,13 @@
 //   meaning they are actively pulled low as you'd expect. This means that the
 //   state of the bus can be manipulated simply by changing the direction bits.
 
+// Note that clock stretching is only supported between an ACK and the next byte
+//   so checking for clock stretching at every clock cycle is unneccessary.
+//   However, the alternative is using some logic to only run the check at the
+//   first clock cycle. So, the result is that while it will run slightly slower
+//   (2 or 3 extra instructions per bit), but it adds only a small amount to the
+//   size in flash.
+
 PORT_t *TWI;
 uint8_t SDA;
 uint8_t SCL;
@@ -52,6 +59,7 @@ void STWI_Restart(void)
 	TWI->DIRCLR = SDA; // Ensure SDA is set high
 	hdelay();
 	TWI->DIRCLR = SCL; // Begin SR by sending SCL high
+	while (!(TWI->IN & SCL)); 	// Wait for any clock stretching
 	qdelay();
 	TWI->DIRSET = SDA; // Send SDA low
 	qdelay();
@@ -66,11 +74,12 @@ void STWI_Restart(void)
 void STWI_Stop(void)
 {	// Generate a STOP condition: While SDA is low, send SCL high
 	//   followed by SDA a quarter-bit later.
-	TWI->DIRSET = SDA; // Ensure SDA is set low
+	TWI->DIRSET = SDA; 			// Ensure SDA is set low
 	hdelay();
-	TWI->DIRCLR = SCL; // Set SCL high
+	TWI->DIRCLR = SCL; 			// Set SCL high
+	while (!(TWI->IN & SCL)); 	// Wait for any clock stretching
 	qdelay();
-	TWI->DIRCLR = SDA; // Set SDA high
+	TWI->DIRCLR = SDA; 			// Set SDA high
 	hdelay();
 }
 
@@ -89,6 +98,7 @@ uint8_t STWI_WriteByte(uint8_t data)
 		// One clock transition
 		qdelay();
 		TWI->DIRCLR = SCL;	// Set SCL high
+		while (!(TWI->IN & SCL)); 	// Wait for any clock stretching
 		hdelay();
 		TWI->DIRSET = SCL;	// Set SCL low
 	}
@@ -130,11 +140,12 @@ uint8_t STWI_ReadByte(uint8_t nack)
 	for (int8_t i = 7; i >= 0; i--)
 	{
 		hdelay();
-		TWI->DIRCLR = SCL;		// Set SCL high
-		c <<= 1;				// Shift bit
-		c |= TWI->IN & SDA;	// Read bit
+		TWI->DIRCLR = SCL;			// Set SCL high
+		while (!(TWI->IN & SCL)); 	// Wait for any clock stretching
+		c <<= 1;					// Shift bit
+		c |= TWI->IN & SDA;			// Read bit
 		hdelay();
-		TWI->DIRSET = SCL;		// Set SCL low
+		TWI->DIRSET = SCL;			// Set SCL low
 	}
 	// Set SDA low for ACK, otherwise leave SDA
 	if (!nack) TWI->DIRSET = SDA;

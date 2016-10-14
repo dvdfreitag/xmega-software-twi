@@ -23,4 +23,4 @@ Precautions
 - This library can be used alongside XMega TWI hardware modules (eg if you need to bit bang for an MCP4728). Simply clear the `TWI_MASTER_ENABLE` bit in the `TWIx.MASTER.CTRLA` register prior to the transaction, then set it after calling `STWI_Stop()`.
 - This library **must** be used with pull-up resistors on the SDA/SCL pins. Luckily the XMega GPIOs are capable of being configured with internal pull-ups. Simply set the "output/pull configuration" bits in `PORTx.PINyCTRL` register to `WIREDANDPULL` to enable the internal pull-up. This will ensure that the SDA/SCL pins are pulled high while they are configured as inputs.
 - Bus arbitration is not supported. Please use caution when using this library with multiple masters on a bus.
-- Clock stretching is not supported. If a slave attempts to stretch the clock by holding SCL low, the master will completely ignore it and continue on its way.
+- ~~Clock stretching is not supported. If a slave attempts to stretch the clock by holding SCL low, the master will completely ignore it and continue on its way.~~
