@@ -1,8 +1,8 @@
 #ifndef SOFTWARETWI_H_
 #define SOFTWARETWI_H_
 
-#define STWI_ACK	0x00
-#define STWI_NACK	0x01
+#define STWI_ACK	0x00U
+#define STWI_NACK	0x01U
 
 void STWI_Start(PORT_t *twi, uint8_t sda, uint8_t scl);
 void STWI_Restart(void);
