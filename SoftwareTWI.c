@@ -11,7 +11,7 @@
 //   state of the bus can be manipulated simply by changing the direction bits.
 
 // Note that clock stretching is only supported between an ACK and the next byte
-//   so checking for clock stretching at every clock cycle is unneccessary.
+//   so checking for clock stretching at every clock cycle is unnecessary.
 //   However, the alternative is using some logic to only run the check at the
 //   first clock cycle. So, the result is that while it will run slightly slower
 //   (2 or 3 extra instructions per bit), but it adds only a small amount to the
@@ -23,7 +23,7 @@ uint8_t SCL;
 
 #define NOP asm volatile("nop");
 // Quarter-bit delay
-void qdelay(void) { NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP }
+void qdelay(void) { NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP }
 // Half-bit delay
 void hdelay(void) { qdelay(); qdelay(); }
 
@@ -85,9 +85,9 @@ void STWI_Stop(void)
 
 uint8_t STWI_WriteByte(uint8_t data)
 {
-	for (int8_t i = 7; i >= 0; i--)
+	for (int8_t i = 0; i < 8; i++)
 	{// Write the data bit
-		if (data & (1 << i))
+		if (data & 0x80)
 		{	// If the bit is a 1,
 			TWI->DIRCLR = SDA; // Set SDA high
 		}
@@ -95,6 +95,8 @@ uint8_t STWI_WriteByte(uint8_t data)
 		{	// Otherwise
 			TWI->DIRSET = SDA;	// Set SDA low
 		}
+		
+		data <<= 1;
 		// One clock transition
 		qdelay();
 		TWI->DIRCLR = SCL;	// Set SCL high
@@ -113,7 +115,8 @@ uint8_t STWI_WriteByte(uint8_t data)
 	TWI->DIRSET = SCL;	// Set SCL low
 	hdelay();
 
-	return (data != 0); // Return (N)ACK status
+	// Return (N)ACK status
+	return data;
 }
 
 uint8_t STWI_WriteBytes(uint8_t *data, uint8_t length)
@@ -137,7 +140,7 @@ uint8_t STWI_ReadByte(uint8_t nack)
 	// Ensure SDA is "high" -> SDA is an input.
 	TWI->DIRCLR = SDA;	// Set SDA high
 
-	for (int8_t i = 7; i >= 0; i--)
+	for (int8_t i = 0; i < 8; i++)
 	{
 		hdelay();
 		TWI->DIRCLR = SCL;			// Set SCL high
